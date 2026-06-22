@@ -74,7 +74,7 @@ const GLOBAL_CSS = `
 
     /* ── Stock History table: horizontal scroll — full table, swipe to see all columns ── */
     .abk-stk-table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
-    .abk-stk-table-wrap table { width: max-content !important; min-width: 100% !important; table-layout: auto !important; }
+    .abk-stk-table-wrap table { width: max-content !important; min-width: 900px !important; table-layout: auto !important; }
     .abk-stk-table-wrap td::before { content: none !important; display: none !important; }
   }
 
@@ -558,7 +558,7 @@ export default function StockHistory({ dark: darkProp }) {
                               {(h.user || 'A')[0].toUpperCase()}
                             </span>
                           </div>
-                          <span style={{ fontSize: 12, color: 'var(--ink-mid)', fontWeight: 300 }}>{h.user || 'Admin'}</span>
+                          <span style={{ fontSize: 12, color: 'var(--ink-mid)', fontWeight: 300, whiteSpace: 'nowrap' }}>{h.user || 'Admin'}</span>
                         </div>
                       </td>
 

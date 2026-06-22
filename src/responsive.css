@@ -41,8 +41,8 @@
 
 /* ── 4. Per-table minimum widths (based on column count × min col width) ─── */
 
-/* Products: 8 cols (Name, SKU, Category, Price, Cost, Stock, Status, Actions) */
-.abk-prod-table-wrap table  { min-width: 820px !important; }
+/* Products: 6 cols (Name, SKU, Price, Stock, Status, Actions) */
+.abk-prod-table-wrap table  { min-width: 680px !important; }
 
 /* Sales: 7 cols (Date/Time, Product, Customer, Qty, Unit Price, Total, Actions) */
 .abk-sales-table-wrap table { min-width: 760px !important; }

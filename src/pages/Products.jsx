@@ -151,7 +151,7 @@ const PRODUCTS_CSS = `
 
     /* ── Products table: horizontal scroll — all columns visible, no hiding ── */
     .abk-prod-table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
-    .abk-prod-table-wrap table { min-width: 820px !important; table-layout: auto !important; }
+    .abk-prod-table-wrap table { min-width: 680px !important; table-layout: auto !important; }
   }
 
   /* Autocomplete dropdown */
@@ -184,11 +184,7 @@ const PRODUCTS_CSS = `
 
 `;
 
-const CATEGORIES = [
-  'Electronics','Clothing','Food & Beverage','Home & Garden',
-  'Sports','Books','Toys','Health & Beauty','Automotive','Other'
-];
-const EMPTY = { name:'',sku:'',price:'',stock:'',minStock:'30',category:'',description:'' };
+const EMPTY = { name:'',sku:'',price:'',stock:'',minStock:'30',description:'' };
 
 /* ── tiny helpers ─────────────────────────────────────────────────────────── */
 function Pill({ children, bg, color, border }) {
@@ -456,7 +452,7 @@ export default function Products({ dark, user }) {
 
   const filtered = products.filter(p => {
     const q = search.toLowerCase();
-    const matchSearch = !search || p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q) || p.category?.toLowerCase().includes(q);
+    const matchSearch = !search || p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q);
     return matchSearch && (statusFilter === 'ALL' || p.status === statusFilter);
   });
 
@@ -469,7 +465,7 @@ export default function Products({ dark, user }) {
   function openCreate() { setEditProduct(null); setForm(EMPTY); setShowModal(true); }
   function openEdit(p) {
     setEditProduct(p);
-    setForm({ name:p.name||'', sku:p.sku||'', price:p.price??'', stock:p.stock??'', minStock:p.minStock??30, category:p.category||'', description:p.description||'' });
+    setForm({ name:p.name||'', sku:p.sku||'', price:p.price??'', stock:p.stock??'', minStock:p.minStock??30, description:p.description||'' });
     setShowModal(true);
   }
 
@@ -477,7 +473,7 @@ export default function Products({ dark, user }) {
     if (!form.name || !form.sku || form.price === '') { alert('Name, SKU and Price are required.'); return; }
     setSaving(true);
     try {
-      const payload = { name:form.name, sku:form.sku, price:parseFloat(form.price), stock:parseInt(form.stock)||0, minStock:parseInt(form.minStock)||30, category:form.category, description:form.description };
+      const payload = { name:form.name, sku:form.sku, price:parseFloat(form.price), stock:parseInt(form.stock)||0, minStock:parseInt(form.minStock)||30, description:form.description };
       if (editProduct) {
         const updated = await updateProduct(editProduct.id, payload);
         setProducts(prev => prev.map(p => p.id === editProduct.id ? updated : p));
@@ -639,7 +635,6 @@ export default function Products({ dark, user }) {
               <colgroup>
                 <col />{/* Name */}
                 <col />{/* SKU */}
-                <col />{/* Category */}
                 <col />{/* Price */}
                 <col />{/* Stock */}
                 <col />{/* Status */}
@@ -650,7 +645,6 @@ export default function Products({ dark, user }) {
                   {[
                     { label: t('sales.product') },
                     { label: t('products.sku'), cls: 'abk-prod-col-sku' },
-                    { label: t('products.category') },
                     { label: t('products.sellingPrice') },
                     { label: t('products.currentStock') },
                     { label: 'Status' },
@@ -663,7 +657,7 @@ export default function Products({ dark, user }) {
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign:'center', padding:'3.5rem 0' }}>
+                    <td colSpan={6} style={{ textAlign:'center', padding:'3.5rem 0' }}>
                       <Package size={34} style={{ color:'var(--border)', margin:'0 auto 10px', display:'block' }} />
                       <p style={{ color:'var(--ink-faint)', fontSize:13, fontWeight:300 }}>
                         {search || statusFilter !== 'ALL' ? t('products.noProductsFilter') : t('products.noProductsYet')}
@@ -681,12 +675,6 @@ export default function Products({ dark, user }) {
                       </td>
                       {/* SKU */}
                       <td className="abk-prod-col-sku" data-label="SKU" style={{ padding:'11px 14px', fontFamily:'monospace', fontSize:12, color:'var(--ink-light)' }}>{p.sku}</td>
-                      {/* Category */}
-                      <td data-label="Category" style={{ padding:'11px 14px' }}>
-                        {p.category
-                          ? <Pill bg="var(--blue-bg)" color="var(--blue)" border="rgba(24,95,165,.2)">{p.category}</Pill>
-                          : <span style={{ color:'var(--border)' }}>—</span>}
-                      </td>
                       {/* Selling price */}
                       <td data-label="Price" style={{ padding:'11px 14px' }}>
                         <span className="abk-serif" style={{ fontSize:14, fontWeight:500, color:'var(--ink)' }}>
@@ -783,18 +771,9 @@ export default function Products({ dark, user }) {
                 <input value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} placeholder={t('products.namePlaceholder')} className="abk-input" />
               </div>
 
-              <div className="abk-prod-modal-grid" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                <div>
-                  <label className="abk-label">{t('products.sku')} *</label>
-                  <input value={form.sku} onChange={e => setForm(f => ({ ...f, sku:e.target.value }))} placeholder={t('products.skuPlaceholder')} className="abk-input" />
-                </div>
-                <div>
-                  <label className="abk-label">{t('products.category')}</label>
-                  <select value={form.category} onChange={e => setForm(f => ({ ...f, category:e.target.value }))} className="abk-input" style={{ cursor:'pointer' }}>
-                    <option value="">{t('products.selectCategory')}</option>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
+              <div>
+                <label className="abk-label">{t('products.sku')} *</label>
+                <input value={form.sku} onChange={e => setForm(f => ({ ...f, sku:e.target.value }))} placeholder={t('products.skuPlaceholder')} className="abk-input" />
               </div>
 
               <div className="abk-prod-modal-grid" style={{ display:'grid', gridTemplateColumns: isWorker ? '1fr' : '1fr 1fr', gap:12 }}>

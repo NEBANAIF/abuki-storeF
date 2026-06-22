@@ -92,25 +92,22 @@ const GLOBAL_CSS = `
 
 `;
 
+// Only two roles exist on the backend: ADMIN and WORKER (see SecurityConfig.java)
 const ROLE_DEFAULTS = {
-  ADMIN:   ['dashboard','products','sales','finance','analytics','stock','users'],
-  MANAGER: ['dashboard','products','sales','analytics','stock'],
-  CASHIER: ['dashboard','sales'],
-  VIEWER:  ['dashboard'],
+  ADMIN:  ['dashboard','products','sales','finance','analytics','stock','users'],
+  WORKER: ['dashboard','products','sales'],
 };
 
 const EMPTY_FORM = {
-  name: '', email: '', role: 'CASHIER',
+  name: '', email: '', role: 'WORKER',
   password: '', status: 'ACTIVE',
-  permissions: ROLE_DEFAULTS['CASHIER'],
+  permissions: ROLE_DEFAULTS['WORKER'],
 };
 
 // Per-role color tokens using CSS vars
 const ROLE_COLORS = {
-  ADMIN:   { stripe: 'var(--red-text)',  badge: { bg: 'var(--red-bg)',    border: 'var(--red-border)',    text: 'var(--red-text)'  }, avatar: '#ef4444' },
-  MANAGER: { stripe: 'var(--blue)',      badge: { bg: 'var(--blue-bg)',   border: 'var(--border)',        text: 'var(--blue)'      }, avatar: 'var(--blue)' },
-  CASHIER: { stripe: 'var(--green)',     badge: { bg: 'var(--green-bg)',  border: 'var(--border)',        text: 'var(--green)'     }, avatar: 'var(--green)' },
-  VIEWER:  { stripe: 'var(--ink-faint)', badge: { bg: 'var(--cream-deep)',border: 'var(--border)',        text: 'var(--ink-light)' }, avatar: 'var(--ink-faint)' },
+  ADMIN:  { stripe: 'var(--red-text)', badge: { bg: 'var(--red-bg)',  border: 'var(--red-border)', text: 'var(--red-text)' }, avatar: '#ef4444' },
+  WORKER: { stripe: 'var(--blue)',     badge: { bg: 'var(--blue-bg)', border: 'var(--border)',     text: 'var(--blue)'     }, avatar: 'var(--blue)' },
 };
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
@@ -165,10 +162,8 @@ export default function UserAccess({ dark: darkProp }) {
   const dark = darkProp ?? (localStorage.getItem('abk-dark') === 'true');
 
   const ROLES = [
-    { value: 'ADMIN',   label: t('users.admins'),   desc: 'Full access to everything'  },
-    { value: 'MANAGER', label: t('users.managers'), desc: 'Access to most modules'     },
-    { value: 'CASHIER', label: 'Cashier',            desc: 'Sales and dashboard only'  },
-    { value: 'VIEWER',  label: 'Viewer',             desc: 'Read-only access'           },
+    { value: 'ADMIN',  label: t('users.admins') || 'Admin',  desc: 'Full access to everything' },
+    { value: 'WORKER', label: 'Worker',                       desc: 'Products, sales & stock-in — no user or history access' },
   ];
 
   const PERMISSIONS = [
@@ -220,8 +215,8 @@ export default function UserAccess({ dark: darkProp }) {
   const paginated  = filtered.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   const activeCount  = users.filter(u => u.status === 'ACTIVE').length;
-  const adminCount   = users.filter(u => u.role === 'ADMIN').length;
-  const managerCount = users.filter(u => u.role === 'MANAGER').length;
+  const adminCount  = users.filter(u => u.role === 'ADMIN').length;
+  const workerCount = users.filter(u => u.role === 'WORKER').length;
 
   function openCreate() { setEditUser(null); setForm(EMPTY_FORM); setShowPassword(false); setShowModal(true); }
   function openEdit(u) {
@@ -336,7 +331,7 @@ export default function UserAccess({ dark: darkProp }) {
           <KpiCard label={t('users.totalUsers')}  value={users.length}  Icon={Users}       stripeColor="var(--blue)"   iconBg="var(--blue-bg)"   iconColor="var(--blue)"   progPct={70} delay=".06s" />
           <KpiCard label={t('users.activeUsers')} value={activeCount}   Icon={CheckCircle} stripeColor="var(--green)"  iconBg="var(--green-bg)"  iconColor="var(--green)"  progPct={Math.round(activeCount / Math.max(users.length, 1) * 100)} delay=".13s" />
           <KpiCard label={t('users.admins')}      value={adminCount}    Icon={Shield}      stripeColor="var(--red-text)" iconBg="var(--red-bg)" iconColor="var(--red-text)" progPct={Math.round(adminCount / Math.max(users.length, 1) * 100)} delay=".20s" />
-          <KpiCard label={t('users.managers')}    value={managerCount}  Icon={User}        stripeColor="var(--purple)" iconBg="var(--purple-bg)" iconColor="var(--purple)" progPct={Math.round(managerCount / Math.max(users.length, 1) * 100)} delay=".27s" />
+          <KpiCard label="Workers"                value={workerCount}   Icon={User}        stripeColor="var(--purple)" iconBg="var(--purple-bg)" iconColor="var(--purple)" progPct={Math.round(workerCount / Math.max(users.length, 1) * 100)} delay=".27s" />
         </div>
 
         {/* ── Tab Toggle ────────────────────────────────────────────────── */}
@@ -406,8 +401,8 @@ export default function UserAccess({ dark: darkProp }) {
             ) : (
               <div className="abk-usr-modal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 10, marginBottom: 14 }}>
                 {paginated.map((u, i) => {
-                  const rc = ROLE_COLORS[u.role] || ROLE_COLORS.VIEWER;
-                  const role = ROLES.find(r => r.value === u.role) || ROLES[3];
+                  const rc = ROLE_COLORS[u.role] || ROLE_COLORS.WORKER;
+                  const role = ROLES.find(r => r.value === u.role) || ROLES[1];
                   return (
                     <div key={u.id} className="abk-anim-scale-in" style={{
                       background: 'var(--card)', border: '1px solid var(--border)',
@@ -518,7 +513,7 @@ export default function UserAccess({ dark: darkProp }) {
         {activeTab === 'roles' && (
           <div className="abk-usr-modal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 10 }}>
             {ROLES.map((role, i) => {
-              const rc = ROLE_COLORS[role.value] || ROLE_COLORS.VIEWER;
+              const rc = ROLE_COLORS[role.value] || ROLE_COLORS.WORKER;
               return (
                 <div key={role.value} className="abk-anim-scale-in" style={{
                   background: 'var(--card)', border: '1px solid var(--border)',
@@ -644,7 +639,7 @@ export default function UserAccess({ dark: darkProp }) {
                 <div style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--ink-light)', textTransform: 'uppercase', letterSpacing: '0.10em', marginBottom: 8 }}>{t('users.role')} *</div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 6 }}>
                   {ROLES.map(r => {
-                    const rc = ROLE_COLORS[r.value] || ROLE_COLORS.VIEWER;
+                    const rc = ROLE_COLORS[r.value] || ROLE_COLORS.WORKER;
                     const selected = form.role === r.value;
                     return (
                       <button key={r.value} onClick={() => handleRoleChange(r.value)} style={{
