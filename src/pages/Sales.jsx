@@ -422,7 +422,7 @@ function ProductAutocomplete({ products, value, onChange, placeholder }) {
    ════════════════════════════════════════════════════════════════════════════ */
 export default function Sales({ dark, user }) {
   // ── Role flags ───────────────────────────────────────────────────────────
-  // WORKER: can only see today's sales, can record sales, CANNOT delete
+  // WORKER: sees today's sales, can record new sales, CANNOT delete
   // ADMIN:  full access — all sales, delete
   const isAdmin  = user?.role?.toUpperCase() === 'ADMIN';
   const isWorker = user?.role?.toUpperCase() === 'WORKER';

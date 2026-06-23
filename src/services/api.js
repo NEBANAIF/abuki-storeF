@@ -109,6 +109,7 @@ export const addStock = adjustStock;
 // getSales()      → ADMIN only (all historical sales)
 // getSalesToday() → ADMIN + WORKER (today's sales only)
 // recordSale()    → ADMIN + WORKER (create new sale)
+// updateSalePayment() → ADMIN + WORKER (record a loan payment)
 // deleteSale()    → ADMIN only (returns 403 for WORKER)
 export const getSales      = ()     => api.get('/sales').then(r => r.data);
 export const getSalesToday = ()     => api.get('/sales/today').then(r => r.data);

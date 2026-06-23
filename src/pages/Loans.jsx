@@ -405,6 +405,19 @@ export default function Loans({ dark, user }) {
             <div style={{ fontSize: 12, color: 'var(--ink-faint)', marginTop: 4, fontWeight: 300 }}>
               Partial and unpaid sales — track repayments
             </div>
+            {/* WORKER mode notice — shown below page title */}
+            {isWorker && (
+              <div style={{
+                marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: '6px 12px', borderRadius: 10,
+                background: dark ? 'rgba(251,191,36,.08)' : '#FFFBEB',
+                border: dark ? '1px solid rgba(251,191,36,.2)' : '1px solid #FDE68A',
+                fontSize: 11, color: dark ? '#FBBf24' : '#92400E',
+              }}>
+                <span style={{ fontWeight: 600 }}>👷 Worker mode</span>
+                <span style={{ fontWeight: 300 }}>· Today's loans · Can record payments · No delete access</span>
+              </div>
+            )}
           </div>
 
           <button onClick={loadLoans} style={{
@@ -569,7 +582,7 @@ export default function Loans({ dark, user }) {
                       {/* Actions */}
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ display: 'flex', gap: 7 }}>
-                          {/* Record payment */}
+                          {/* Record payment — permitted for both ADMIN and WORKER */}
                           <button onClick={() => openEdit(s)} title="Record payment" style={{
                             width: 30, height: 30, borderRadius: 8,
                             border: '1px solid var(--yellow-border)',
@@ -582,7 +595,7 @@ export default function Loans({ dark, user }) {
                           >
                             <Pencil size={13} />
                           </button>
-                          {/* Delete */}
+                          {/* Delete — ADMIN only */}
                           {isAdmin && (
                             <button onClick={() => setDeleteConfirm(s)} title="Delete loan record" style={{
                               width: 30, height: 30, borderRadius: 8,

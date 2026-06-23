@@ -94,8 +94,8 @@ const GLOBAL_CSS = `
 
 // Only two roles exist on the backend: ADMIN and WORKER (see SecurityConfig.java)
 const ROLE_DEFAULTS = {
-  ADMIN:  ['dashboard','products','sales','finance','analytics','stock','users'],
-  WORKER: ['dashboard','products','sales'],
+  ADMIN:  ['dashboard','products','sales','loans','stock'],
+  WORKER: ['dashboard','products','sales','loans'],
 };
 
 const EMPTY_FORM = {
@@ -170,10 +170,8 @@ export default function UserAccess({ dark: darkProp }) {
     { key: 'dashboard', label: t('nav.dashboard') },
     { key: 'products',  label: t('nav.products')  },
     { key: 'sales',     label: t('nav.sales')     },
-    { key: 'finance',   label: t('nav.finance')   },
-    { key: 'analytics', label: t('nav.analytics') },
+    { key: 'loans',     label: t('nav.loans') || 'Loans' },
     { key: 'stock',     label: t('nav.stock')     },
-    { key: 'users',     label: t('nav.users')     },
   ];
 
   const [users, setUsers]                 = useState([]);
