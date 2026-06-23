@@ -3,7 +3,7 @@ import {
   Landmark, Search, RefreshCw, X, XCircle, CheckCircle,
   Trash2, Pencil, ChevronLeft, ChevronRight, Calendar,
 } from 'lucide-react';
-import { getSales, getSalesToday, updateSalePayment, deleteSale } from '../services/api';
+import { getSales, updateSalePayment, deleteSale } from '../services/api';
 import { localYMD, normalizeSaleDate } from '../utils/dateUtils';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -274,8 +274,8 @@ export default function Loans({ dark, user }) {
   async function loadLoans() {
     try {
       setLoading(true); setError(null);
-      // ADMIN: fetch all sales; WORKER: fetch today's sales only (getSales returns 403 for workers)
-      const all = isAdmin ? await getSales() : await getSalesToday();
+      // Both ADMIN and WORKER see the full loan/debt list now
+      const all = await getSales();
       // Only show PARTIAL_LOAN sales (remainingLoan > 0)
       setLoans(all.filter(s => s.paymentStatus === 'PARTIAL_LOAN' && (s.remainingLoan ?? 0) > 0));
     } catch {
@@ -415,7 +415,7 @@ export default function Loans({ dark, user }) {
                 fontSize: 11, color: dark ? '#FBBf24' : '#92400E',
               }}>
                 <span style={{ fontWeight: 600 }}>👷 Worker mode</span>
-                <span style={{ fontWeight: 300 }}>· Today's loans · Can record payments · No delete access</span>
+                <span style={{ fontWeight: 300 }}>· Can record payments · No delete access</span>
               </div>
             )}
           </div>

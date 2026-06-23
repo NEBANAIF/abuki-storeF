@@ -5,7 +5,7 @@ import {
   XCircle, Calendar, CheckCircle, Package,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getSales, getSalesToday, recordSale, deleteSale, getProducts } from '../services/api';
+import { getSales, recordSale, deleteSale, getProducts } from '../services/api';
 import { localYMD, normalizeSaleDate } from '../utils/dateUtils';
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -422,7 +422,7 @@ function ProductAutocomplete({ products, value, onChange, placeholder }) {
    ════════════════════════════════════════════════════════════════════════════ */
 export default function Sales({ dark, user }) {
   // ── Role flags ───────────────────────────────────────────────────────────
-  // WORKER: sees today's sales, can record new sales, CANNOT delete
+  // WORKER: sees ALL sales, can record new sales, CANNOT delete
   // ADMIN:  full access — all sales, delete
   const isAdmin  = user?.role?.toUpperCase() === 'ADMIN';
   const isWorker = user?.role?.toUpperCase() === 'WORKER';
@@ -460,22 +460,12 @@ export default function Sales({ dark, user }) {
   async function loadAll() {
     try {
       setLoading(true); setError(null);
-
-      if (isWorker) {
-        // WORKER: only fetch today's sales + products
-        const [s, p] = await Promise.all([
-          getSalesToday(),   // /api/sales/today — allowed for workers
-          getProducts(),
-        ]);
-        setSales(s); setProducts(p);
-      } else {
-        // ADMIN: fetch all sales + products
-        const [s, p] = await Promise.all([
-          getSales(),
-          getProducts(),
-        ]);
-        setSales(s); setProducts(p);
-      }
+      // Both ADMIN and WORKER see the full sales list now
+      const [s, p] = await Promise.all([
+        getSales(),
+        getProducts(),
+      ]);
+      setSales(s); setProducts(p);
     } catch { setError(t('sales.errorConnect')); }
     finally { setLoading(false); }
   }
@@ -628,7 +618,7 @@ export default function Sales({ dark, user }) {
                 fontSize:11, color: dark ? '#FBBf24' : '#92400E',
               }}>
                 <span style={{ fontWeight:600 }}>👷 Worker mode</span>
-                <span style={{ fontWeight:300 }}>· Today's sales only · No delete access</span>
+                <span style={{ fontWeight:300 }}>· No delete access</span>
               </div>
             )}
           </div>
@@ -660,7 +650,7 @@ export default function Sales({ dark, user }) {
         </div>
 
         {/* ── KPI Cards ─────────────────────────────────────────────────── */}
-        <div className="abk-sales-kpi-4" style={{ display:'grid', gridTemplateColumns:'repeat(4,minmax(0,1fr))', gap:10, marginBottom:'1.1rem' }}>
+        <div className="abk-sales-kpi-4" style={{ display:'grid', gridTemplateColumns:isAdmin ? 'repeat(4,minmax(0,1fr))' : 'repeat(2,minmax(0,1fr))', gap:10, marginBottom:'1.1rem' }}>
           <KpiCard
             label={t('sales.todayRevenue')} value={`$${fmt(todayRev)}`}
             sub={`${todaySales.length} ${t('sales.transactionsToday')}`}
@@ -673,18 +663,23 @@ export default function Sales({ dark, user }) {
             Icon={ShoppingCart} stripeColor="var(--blue)" iconBg="var(--blue-bg)" iconColor="var(--blue)"
             progPct={todaySales.length > 0 ? 55 : 2} delay=".13s"
           />
-          <KpiCard
-            label={t('sales.totalRevenue')} value={`$${fmt(totalRev)}`}
-            sub={`${totalItems} ${t('sales.totalItemsSold')}`}
-            Icon={TrendingUp} stripeColor="var(--purple)" iconBg="var(--purple-bg)" iconColor="var(--purple)"
-            progPct={82} delay=".20s"
-          />
-          <KpiCard
-            label={t('sales.unsoldItems')} value={unsoldItems}
-            sub={`$${fmt(unsoldValue)} ${t('sales.unsoldValue')}`}
-            Icon={Package} stripeColor="var(--amber)" iconBg="var(--amber-bg)" iconColor="var(--amber)"
-            progPct={unsoldItems > 0 ? 60 : 2} delay=".27s"
-          />
+          {/* Total Revenue & Unsold Items — ADMIN only */}
+          {isAdmin && (
+            <>
+              <KpiCard
+                label={t('sales.totalRevenue')} value={`$${fmt(totalRev)}`}
+                sub={`${totalItems} ${t('sales.totalItemsSold')}`}
+                Icon={TrendingUp} stripeColor="var(--purple)" iconBg="var(--purple-bg)" iconColor="var(--purple)"
+                progPct={82} delay=".20s"
+              />
+              <KpiCard
+                label={t('sales.unsoldItems')} value={unsoldItems}
+                sub={`$${fmt(unsoldValue)} ${t('sales.unsoldValue')}`}
+                Icon={Package} stripeColor="var(--amber)" iconBg="var(--amber-bg)" iconColor="var(--amber)"
+                progPct={unsoldItems > 0 ? 60 : 2} delay=".27s"
+              />
+            </>
+          )}
         </div>
 
         {/* ── Search & Filter ───────────────────────────────────────────── */}
